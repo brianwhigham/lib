@@ -1,0 +1,3 @@
+#!/bin/bash
+conffile=/yourpath/etc/watchdomains.conf
+for d in $(<$conffile); do whois $d | grep -q Expiration || echo $d is available\! | /yourpath/bin/sms.py -q; done
