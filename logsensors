@@ -1,4 +1,16 @@
 #!/bin/bash
 mkdir -p /yourpath/log/sensors
 
-FS=$'\n'; LOGDIR=/yourpath/log/sensors/; for d in $(echo -e "\n$(sensors)"|awk '{RS="\n\n"; print $1;}'|grep -v "^$"); do for g in $(sensors $d | egrep -v "Adapter|$d|^$" | cut -b 1-22 | sed "s/\+//; s/ V//; s/ RPM//; s/.C$//; s/: */ /;"); do unset IFS; gauge=($g); IFS=$'\n'; echo ${gauge[1]} > $LOGDIR/$d.${gauge[0]}.$(date +%Y%m%d%H%M); done; done; unset IFS
+IFS=$'\n'
+LOGDIR=/yourpath/log/sensors/
+for d in $(echo -e "\n$(sensors)"|awk '{RS="\n\n"; print $1;}'|grep -v "^$")
+do
+  for g in $(sensors $d | egrep -v "Adapter|$d|^$" | cut -b 1-22 | sed "s/\+//; s/ V//; s/ RPM//; s/.C$//; s/ \([^:]*\)/_\1/g; s/: */ /;")
+  do
+    unset IFS
+    gauge=($g)
+    IFS=$'\n'
+    echo ${gauge[1]} > $LOGDIR/$d.${gauge[0]//./_}.$(date +%Y%m%d%H%M)
+  done
+done
+unset IFS
