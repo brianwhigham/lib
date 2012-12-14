@@ -1,16 +1,24 @@
 #!/bin/bash
+debug=0
+
 mkdir -p /yourpath/log/sensors
 
 IFS=$'\n'
 LOGDIR=/yourpath/log/sensors/
 for d in $(echo -e "\n$(sensors)"|awk '{RS="\n\n"; print $1;}'|grep -v "^$")
 do
-  for g in $(sensors $d | egrep -v "Adapter|$d|^$" | cut -b 1-22 | sed "s/\+//; s/ V//; s/ RPM//; s/.C$//; s/ \([^:]*\)/_\1/g; s/: */ /;")
+  for g in $(sensors $d | egrep -v "Adapter|$d|^$" | cut -b 1-22 | sed "s/ V//; s/ RPM//; s/.C *$//g; s/\+//g; s/ *$//; s/: */|/; s/ \([^|]*\)/_\1/g; s/|/ /;")
   do
     unset IFS
     gauge=($g)
     IFS=$'\n'
-    echo ${gauge[1]} > $LOGDIR/$d.${gauge[0]//./_}.$(date +%Y%m%d%H%M)
+    if [[ "$debug" == 1 ]]; then
+      # just echo it, don't log
+      echo ${gauge[1]} $LOGDIR/$d.${gauge[0]//./_}.$(date +%Y%m%d%H%M)
+    else
+      # log it
+      echo ${gauge[1]} > $LOGDIR/$d.${gauge[0]//./_}.$(date +%Y%m%d%H%M)
+    fi
   done
 done
 unset IFS
