@@ -53,11 +53,15 @@ if not options.recipient:
 # not too long!
 message = options.message[:139]
 
-gv_login = gvoice.GoogleVoiceLogin(email, password)
-text_sender = gvoice.TextSender(gv_login)
-
-text_sender.text = options.message
-text_sender.send_text(options.recipient)
+if len(options.message) <= 140:
+  gv_login = gvoice.GoogleVoiceLogin(email, password)
+  text_sender = gvoice.TextSender(gv_login)
+  text_sender.text = options.message
+  text_sender.send_text(options.recipient)
+else:
+ print 'Message too long:'
+ print message
+ exit() 
 
 if text_sender.response and options.verbose:
   print 'Success! Message sent!'
