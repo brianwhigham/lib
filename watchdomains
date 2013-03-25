@@ -1,3 +1,8 @@
 #!/bin/bash
+# Author: Brian Whigham
+# depends on sms.py from this repo
+# conf file is just a list of domains, separated by either space or newlines
+# symlink /yourpath to your home directory or wherever you put the conf file
+
 conffile=/yourpath/etc/watchdomains.conf
 for d in $(<$conffile); do whois $d | grep -q Expiration || echo $d is available\! | /yourpath/bin/sms.py -q; done
